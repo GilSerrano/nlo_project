@@ -1,0 +1,39 @@
+# Simple network where:
+# - 1 affects 2 and 3, is affected by 2
+# - 1 affects 1, is affected by 1
+# - 3 affects 2, is affected by 1
+# - agents have identity dynamics and simple input laws
+
+agent1:
+    idx: 1
+    n_i: 3
+    p_i: 2
+    x_0: [1, 1, 1]
+    x_H: [0, 0, 0]
+    in_neigh: {2}
+    out_neigh: {2, 3}
+    matA: [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    matB: [[1, 0], [0, 1], [1, 1]]
+    
+    
+agent2:
+    idx: 2
+    n_i: 3
+    p_i: 2
+    x_0: [-1, -1, -1]
+    x_H: [0, 0, 0]
+    in_neigh: {1, 3}
+    out_neigh: {1}
+    matA: [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    matB: [[1, 0], [0, 1], [1, 1]]
+    
+agent3:
+    idx: 3
+    n_i: 3
+    p_i: 2
+    x_0: [1, -1, 1]
+    x_H: [0, 0, 0]
+    in_neigh: {1}
+    out_neigh: {2}
+    matA: [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    matB: [[1, 0], [0, 1], [1, 1]]
