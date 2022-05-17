@@ -14,6 +14,8 @@ agent1:
     out_neigh: {2, 3}
     matA: [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
     matB: [[1, 0], [0, 1], [1, 1]]
+    matA_inter: [[[0.2, 0, 0], [0, 0.2, 0],[0, 0, 0.2]],[[0.3, 0, 0], [0, 0.3, 0],[0, 0, 0.3]]] # dynamic A interactions with out-neighbours
+    matB_inter: [[[0.2, 0], [0, 0.2],[0.2, 0.2]],[[0.3, 0], [0, 0.3],[0.3, 0.3]]]               # dynamic B interactions with out-neighbours
     
     
 agent2:
@@ -26,7 +28,10 @@ agent2:
     out_neigh: {1}
     matA: [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
     matB: [[1, 0], [0, 1], [1, 1]]
-    
+    matA_inter: [[[0.1, 0, 0], [0, 0.1, 0],[0, 0, 0.1]]]  # dynamic A interactions with out-neighbours
+    matB_inter: [[[0.1, 0], [0, 0.1],[0.1, 0.1]]]         # dynamic B interactions with out-neighbours
+
+
 agent3:
     idx: 3
     n_i: 3
@@ -37,3 +42,5 @@ agent3:
     out_neigh: {2}
     matA: [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
     matB: [[1, 0], [0, 1], [1, 1]]
+    matA_inter: [[[0.2, 0, 0], [0, 0.2, 0],[0, 0, 0.2]]]  # dynamic A interactions with out-neighbours
+    matB_inter: [[[0.2, 0], [0, 0.2],[0.2, 0.2]]]         # dynamic B interactions with out-neighbours
