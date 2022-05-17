@@ -6,6 +6,7 @@ Definition of class Agent
 
 import numpy as np
 import yaml
+import file_handling
 
 
 class Agent(object):
@@ -26,13 +27,35 @@ class Agent(object):
         # Own dynamics
         self.matA = np.array(data['matA'])
         self.matB = np.array(data['matB'])
-        
-        
 
+        # Dynamic interactions with out-neighbours
+        self.outA = {}
+        self.outB = {}
+        for ii, out_idx in enumerate(self.out_neigh):
+            self.outA[(out_idx, self.idx)] = np.array(data['matA_inter'][ii])
+            self.outB[(out_idx, self.idx)] = np.array(data['matB_inter'][ii])
 
+    def __repr__(self):
+        output = ''
+        output += 'Agent id: ' + str(self.idx) + '\n'
+        output += '\t Dimensions: n = ' + str(self.n) + ' p = ' + str(self.p) + '\n'
+        output += '\t Initial conditions: x0 = ' + str(self.x_0) + '\n'
+        output += '\t Final goal: xH = ' + str(self.x_H) + '\n'
+        output += '\t In-neighbourhood:  { ' + str(self.in_neigh) + ' }\n'
+        output += '\t Out-neighbourhood: { ' + str(self.out_neigh) + ' }\n'
+        output += '\t Matrix A = ' + str(self.matA) + '\n'
+        output += '\t Matrix B = ' + str(self.matB) + '\n'
+        for key, value in self.outA.items():
+            output += '\t A'+ str(key) + ' = ' + str(value) + '\n'
+        for key, value in self.outB.items():
+            output += '\t B'+ str(key) + ' = ' + str(value) + '\n'
+        
+        return output
+        
 if __name__ == "__main__":
     
-    with open("C:/Users/gil97/Documents/Repositories/nlo_project/config/mpc_3agents_noInteractions.yaml", 'r') as stream:
+    file = file_handling.get_params_file()
+    with open(file, 'r') as stream:
         try:
             data = yaml.safe_load(stream)
             print('Loaded data.')
