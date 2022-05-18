@@ -3,6 +3,7 @@ sys.path.append("..")
 import cvxpy as cp
 import problem
 import numpy as np
+import centralised_augmented_lagrangian as cal
 from utils.file_handling import get_params_file
 
 if __name__ == '__main__':
@@ -17,15 +18,19 @@ if __name__ == '__main__':
     rho = 5
     horizon = 10
 
+
+    cent_al = cal.CentralisedAugmentedLagrangian(prob, rho, horizon)
+    print(cent_al.x.value)
+    '''
     # Set up optimisation variables
     x = cp.Variable((prob.n*(horizon+1),1))
     u = cp.Variable((prob.p*horizon,1))
     lam = cp.Parameter((prob.n*horizon,1))
     lam.value = np.ones((prob.n*horizon,1))
 
-    '''
-    Compose the cost function
-    '''
+
+    #Compose the cost function
+   
     cost_function = 0
     
     # sum the quadratic cost for the input over the horizon 
@@ -51,3 +56,4 @@ if __name__ == '__main__':
     result = opt_mpc.solve() # warm_start=True
 
     print(x.value)
+    '''

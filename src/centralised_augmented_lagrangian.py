@@ -42,10 +42,11 @@ class CentralisedAugmentedLagrangian(object):
     the Lagrange multipliers.
     '''
     def main_loop(self):
-        
+        print('Creating cost function')
         # Update cost function with new Lagrange multipliers
         self.create_cost_function()
-
+        
+        print('Starting main loop')
         while True:
             self.x_aux = self.x.value            
 
@@ -77,7 +78,7 @@ class CentralisedAugmentedLagrangian(object):
             
         # sum the inner product of lambda with the constraints over the horizon
         for ii in range(self.horizon):
-            cost_function += self.lam[ii*self.prob.n:(ii+1)*self.prob.n].T @ (self.x[(ii+1)*self.prob.n:(ii+2)*self.prob.n] - self.prob.MatA @ self.x[ii*self.prob.n:(ii+1)*self.prob.n] -self.prob.MatB @ self.u[ii*self.prob.p:(ii+1)*self.prob.p])
+            self.cost_function += self.lam[ii*self.prob.n:(ii+1)*self.prob.n].T @ (self.x[(ii+1)*self.prob.n:(ii+2)*self.prob.n] - self.prob.MatA @ self.x[ii*self.prob.n:(ii+1)*self.prob.n] -self.prob.MatB @ self.u[ii*self.prob.p:(ii+1)*self.prob.p])
 
         # # sum the squared norm of the constraints over the horizon
         for ii in range(self.horizon):
@@ -99,7 +100,7 @@ class CentralisedAugmentedLagrangian(object):
     in the warm start of the optimiser
     '''
     def update_variables(self):
-        self.x.values = self.x_aux + self.tau * (self.x.values - self.x_aux)
+        self.x.value = self.x_aux + self.tau * (self.x.value - self.x_aux)
 
     '''
     check_constraints()
@@ -112,10 +113,10 @@ class CentralisedAugmentedLagrangian(object):
         for ii in range(self.horizon):
             constraints_sum += self.x.value[(ii+1)*self.prob.n:(ii+2)*self.prob.n] - self.prob.MatA @ self.x.value[ii*self.prob.n:(ii+1)*self.prob.n] - self.prob.MatB @ self.u.value[ii*self.prob.p:(ii+1)*self.prob.p]
 
-        if np.abs(constraints_sum) <= 10**(-5): # consider constraints are met
+        if np.linalg.norm(constraints_sum) <= 10**(-5): # consider constraints are met
             return True
         else:
-            print('Constraints error is ' + str(constraints_sum))
+            print('Constraints error is ' + str(np.linalg.norm(constraints_sum)))
             return False
  
     '''
@@ -123,14 +124,13 @@ class CentralisedAugmentedLagrangian(object):
     Update the Lagrange multiplier parameters, according to equation (7) in Algorithm 1
     '''
     def update_lagrange_multipliers(self):
-        constraints_sum = 0
 
-        # sum the constraints over the horizon
         for ii in range(self.horizon):
-            constraints_sum += self.x.value[(ii+1)*self.prob.n:(ii+2)*self.prob.n] - self.prob.MatA @ self.x.value[ii*self.prob.n:(ii+1)*self.prob.n] - self.prob.MatB @ self.u.value[ii*self.prob.p:(ii+1)*self.prob.p]
+            # sum the constraints over the horizon
+            constraints_value = self.x.value[(ii+1)*self.prob.n:(ii+2)*self.prob.n] - self.prob.MatA @ self.x.value[ii*self.prob.n:(ii+1)*self.prob.n] - self.prob.MatB @ self.u.value[ii*self.prob.p:(ii+1)*self.prob.p]
         
-        # update the Langrange multipliers
-        self.lam.value = self.lam.value + self.rho * self.tau * constraints_sum
+            # update the Langrange multipliers
+            self.lam.value[ii*self.prob.n:(ii+1)*self.prob.n] = self.lam.value[ii*self.prob.n:(ii+1)*self.prob.n] + self.rho * self.tau * constraints_value
 
     '''
     increase_iterations()
