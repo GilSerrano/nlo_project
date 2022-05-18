@@ -39,9 +39,6 @@ class Problem(object):
         self.x0 = np.array(self.x0).reshape(len(self.x0),1)
         self.xH = np.array(self.xH).reshape(len(self.xH),1)
 
-        print('shape of x0 is ' + str(self.x0.shape))
-        print('shape of xH is ' + str(self.xH.shape))
-
     '''
     Check if matrices A and B are of correct size for each agent.
     If incogruences are found, exits the program.

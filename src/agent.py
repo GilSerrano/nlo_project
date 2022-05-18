@@ -3,10 +3,13 @@ Definition of class Agent
 
 
 '''
-
+import sys
+sys.path.append("..")
 import numpy as np
 import yaml
-import file_handling
+from utils.file_handling import get_params_file
+
+
 
 
 class Agent(object):
@@ -35,6 +38,8 @@ class Agent(object):
             self.outA[(out_idx, self.idx)] = np.array(data['matA_inter'][ii])
             self.outB[(out_idx, self.idx)] = np.array(data['matB_inter'][ii])
 
+        self.matCost = np.array(data['matCost'])
+
     def __repr__(self):
         output = ''
         output += 'Agent id: ' + str(self.idx) + '\n'
@@ -54,7 +59,7 @@ class Agent(object):
         
 if __name__ == "__main__":
     
-    file = file_handling.get_params_file()
+    file = get_params_file()
     with open(file, 'r') as stream:
         try:
             data = yaml.safe_load(stream)
