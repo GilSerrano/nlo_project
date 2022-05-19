@@ -2,7 +2,7 @@ import cvxpy as cp
 import numpy as np
 
 class CentralisedAugmentedLagrangian(object):
-    def __init__(self, problem, rho, horizon):
+    def __init__(self, problem):
         self.k = 0
         
         # Get problem details
@@ -10,17 +10,15 @@ class CentralisedAugmentedLagrangian(object):
 
         # Initialise optimization related parameters and functions
         self.cost_function = 0
-        self.rho = rho
-        self.horizon = horizon
         self.tau = 1
 
         # Set up optimisation variables
-        self.x = cp.Variable((self.prob.n * (self.horizon + 1), 1))
-        self.u = cp.Variable((self.prob.p * self.horizon, 1))
+        self.x = cp.Variable((self.prob.n * (self.prob.horizon + 1), 1))
+        self.u = cp.Variable((self.prob.p * self.prob.horizon, 1))
 
         # Initialise Lagrange multipliers to 1
-        self.lam = cp.Parameter((self.prob.n * self.horizon, 1))
-        self.lam.value = np.ones((self.prob.n * self.horizon, 1))
+        self.lam = cp.Parameter((self.prob.n * self.prob.horizon, 1))
+        self.lam.value = np.ones((self.prob.n * self.prob.horizon, 1))
 
         # Define the constraints
         self.constraints = [
@@ -29,8 +27,8 @@ class CentralisedAugmentedLagrangian(object):
             ]
 
         # Auxiliary variable to save previous x value
-        self.x.value = np.zeros((self.prob.n * (self.horizon + 1), 1))
-        self.x_aux = np.zeros((self.prob.n * (self.horizon + 1), 1))
+        self.x.value = np.zeros((self.prob.n * (self.prob.horizon + 1), 1))
+        self.x_aux = np.zeros((self.prob.n * (self.prob.horizon + 1), 1))
 
         # Everything set, go to main loop
         self.main_loop()
@@ -73,16 +71,16 @@ class CentralisedAugmentedLagrangian(object):
     '''
     def create_cost_function(self):
         # sum the quadratic cost for the input over the horizon 
-        for ii in range(self.horizon):
+        for ii in range(self.prob.horizon):
             self.cost_function += cp.quad_form(self.u[ii*self.prob.p:(ii+1)*self.prob.p], self.prob.MatCost)
             
         # sum the inner product of lambda with the constraints over the horizon
-        for ii in range(self.horizon):
+        for ii in range(self.prob.horizon):
             self.cost_function += self.lam[ii*self.prob.n:(ii+1)*self.prob.n].T @ (self.x[(ii+1)*self.prob.n:(ii+2)*self.prob.n] - self.prob.MatA @ self.x[ii*self.prob.n:(ii+1)*self.prob.n] -self.prob.MatB @ self.u[ii*self.prob.p:(ii+1)*self.prob.p])
 
         # # sum the squared norm of the constraints over the horizon
-        for ii in range(self.horizon):
-            self.cost_function += (self.rho/2) * cp.sum_squares(self.x[(ii+1)*self.prob.n:(ii+2)*self.prob.n] - self.prob.MatA @ self.x[ii*self.prob.n:(ii+1)*self.prob.n] - self.prob.MatB @ self.u[ii*self.prob.p:(ii+1)*self.prob.p])
+        for ii in range(self.prob.horizon):
+            self.cost_function += (self.prob.rho/2) * cp.sum_squares(self.x[(ii+1)*self.prob.n:(ii+2)*self.prob.n] - self.prob.MatA @ self.x[ii*self.prob.n:(ii+1)*self.prob.n] - self.prob.MatB @ self.u[ii*self.prob.p:(ii+1)*self.prob.p])
 
     '''
     minimise()
@@ -110,10 +108,10 @@ class CentralisedAugmentedLagrangian(object):
         constraints_sum = 0
         
         # sum the constraints over the horizon
-        for ii in range(self.horizon):
+        for ii in range(self.prob.horizon):
             constraints_sum += self.x.value[(ii+1)*self.prob.n:(ii+2)*self.prob.n] - self.prob.MatA @ self.x.value[ii*self.prob.n:(ii+1)*self.prob.n] - self.prob.MatB @ self.u.value[ii*self.prob.p:(ii+1)*self.prob.p]
 
-        if np.linalg.norm(constraints_sum) <= 10**(-5): # consider constraints are met
+        if np.linalg.norm(constraints_sum) <= 10**(-8): # consider constraints are met
             return True
         else:
             print('Constraints error is ' + str(np.linalg.norm(constraints_sum)))
@@ -125,12 +123,12 @@ class CentralisedAugmentedLagrangian(object):
     '''
     def update_lagrange_multipliers(self):
 
-        for ii in range(self.horizon):
+        for ii in range(self.prob.horizon):
             # sum the constraints over the horizon
             constraints_value = self.x.value[(ii+1)*self.prob.n:(ii+2)*self.prob.n] - self.prob.MatA @ self.x.value[ii*self.prob.n:(ii+1)*self.prob.n] - self.prob.MatB @ self.u.value[ii*self.prob.p:(ii+1)*self.prob.p]
         
             # update the Langrange multipliers
-            self.lam.value[ii*self.prob.n:(ii+1)*self.prob.n] = self.lam.value[ii*self.prob.n:(ii+1)*self.prob.n] + self.rho * self.tau * constraints_value
+            self.lam.value[ii*self.prob.n:(ii+1)*self.prob.n] = self.lam.value[ii*self.prob.n:(ii+1)*self.prob.n] + self.prob.rho * self.tau * constraints_value
 
     '''
     increase_iterations()
