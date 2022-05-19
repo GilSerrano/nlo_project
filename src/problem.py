@@ -1,5 +1,7 @@
+import sys
+sys.path.append("..")
 import yaml
-import agent
+from src.agent import Agent
 import numpy as np
 
 class Problem(object):
@@ -30,7 +32,7 @@ class Problem(object):
                 print(error)        
         
         for key in data:
-            self.agents.append(agent.Agent(data[key]))
+            self.agents.append(Agent(data[key]))
             self.n_i.append(data[key]['n_i'])
             self.p_i.append(data[key]['p_i'])
             self.x0.extend(data[key]['x_0'])
