@@ -10,6 +10,7 @@ class CentralisedAugmentedLagrangian(object):
 
         # Initialise optimization related parameters and functions
         self.cost_function = 0
+        self.constraints_sum = 0
         self.tau = 1
 
         # Set up optimisation variables
@@ -105,16 +106,20 @@ class CentralisedAugmentedLagrangian(object):
     Verify if the constraints are met to decide if the problem has been solved.
     '''
     def check_constraints(self):
-        constraints_sum = 0
+        aux_constraints_sum = self.constraints_sum
+        self.constraints_sum = 0
         
         # sum the constraints over the horizon
         for ii in range(self.prob.horizon):
-            constraints_sum += self.x.value[(ii+1)*self.prob.n:(ii+2)*self.prob.n] - self.prob.MatA @ self.x.value[ii*self.prob.n:(ii+1)*self.prob.n] - self.prob.MatB @ self.u.value[ii*self.prob.p:(ii+1)*self.prob.p]
+            self.constraints_sum += self.x.value[(ii+1)*self.prob.n:(ii+2)*self.prob.n] - self.prob.MatA @ self.x.value[ii*self.prob.n:(ii+1)*self.prob.n] - self.prob.MatB @ self.u.value[ii*self.prob.p:(ii+1)*self.prob.p]
 
-        if np.linalg.norm(constraints_sum) <= 10**(-8): # consider constraints are met
+        if np.linalg.norm(self.constraints_sum) <= 10**(-8): # consider constraints are met
+            return True
+        elif np.linalg.norm(self.constraints_sum - aux_constraints_sum) <= 10**(-8):
+            print('Converged but could not find a solution that met the constraints.')
             return True
         else:
-            print('Constraints error is ' + str(np.linalg.norm(constraints_sum)))
+            print('Constraints error is ' + str(np.linalg.norm(self.constraints_sum)))
             return False
  
     '''
