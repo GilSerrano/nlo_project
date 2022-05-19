@@ -5,55 +5,37 @@ import problem
 import numpy as np
 import centralised_augmented_lagrangian as cal
 from utils.file_handling import get_params_file
+from utils.plotting import plot3Dagent
+from utils.results_parser import get_agent_states, get_agent_inputs
 
 if __name__ == '__main__':
     
+    #filename = 'mpc_3agents_2d_noInteractions'
+    filename = 'mpc_3agents_3d_noInteractions'
+    #filename = 'mpc_3agents_3d_simpleInteractions'
+
     # Get path to the problem configuration file
-    file = get_params_file()
+    file = get_params_file(filename)
 
     # Set up the problem
     prob = problem.CentralisedProblem(file)
 
-    # Initialise optimisation related constants
-    rho = 5
-    horizon = 10
-
-
-    cent_al = cal.CentralisedAugmentedLagrangian(prob, rho, horizon)
+    # Begin solving the problem with centralised adal
+    cent_al = cal.CentralisedAugmentedLagrangian(prob)
     print(cent_al.x.value)
-    '''
-    # Set up optimisation variables
-    x = cp.Variable((prob.n*(horizon+1),1))
-    u = cp.Variable((prob.p*horizon,1))
-    lam = cp.Parameter((prob.n*horizon,1))
-    lam.value = np.ones((prob.n*horizon,1))
 
+    ag1_state = get_agent_states(prob, cent_al.x.value, 1)
+    ag2_state = get_agent_states(prob, cent_al.x.value, 2)
+    ag3_state = get_agent_states(prob, cent_al.x.value, 3)
 
-    #Compose the cost function
-   
-    cost_function = 0
-    
-    # sum the quadratic cost for the input over the horizon 
-    for ii in range(horizon):
-        cost_function += cp.quad_form(u[ii*prob.p:(ii+1)*prob.p], prob.MatCost) 
-    
-    # sum the inner product of lambda with the constraints over the horizon
-    for ii in range(horizon):
-        cost_function += lam[ii*prob.n:(ii+1)*prob.n].T @ (x[(ii+1)*prob.n:(ii+2)*prob.n] - prob.MatA @ x[ii*prob.n:(ii+1)*prob.n] -prob.MatB @ u[ii*prob.p:(ii+1)*prob.p])
+    ag1_input = get_agent_inputs(prob, cent_al.u.value, 1)
+    ag2_input = get_agent_inputs(prob, cent_al.u.value, 2)
+    ag3_input = get_agent_inputs(prob, cent_al.u.value, 3)
 
-    # # sum the squared norm of the constraints over the horizon
-    for ii in range(horizon):
-        cost_function += (rho/2) * cp.sum_squares(x[(ii+1)*prob.n:(ii+2)*prob.n] - prob.MatA @ x[ii*prob.n:(ii+1)*prob.n] -prob.MatB @ u[ii*prob.p:(ii+1)*prob.p])
+    plot3Dagent(ag1_state, 1)
+    plot3Dagent(ag2_state, 2)
+    plot3Dagent(ag3_state, 3)
 
-    # Add equality constraints to initial and final states and box constraints to state and input
-    constraints = [
-        x[0:prob.n] == prob.x0,
-        x[-prob.n:,] == prob.xH,
-        ]
-
-    objective = cp.Minimize(cost_function)
-    opt_mpc = cp.Problem(objective, constraints)
-    result = opt_mpc.solve() # warm_start=True
-
-    print(x.value)
-    '''
+    plot3Dagent(ag1_input, 1)
+    plot3Dagent(ag2_input, 2)
+    plot3Dagent(ag3_input, 3)
