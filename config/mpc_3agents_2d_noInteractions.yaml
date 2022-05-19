@@ -6,7 +6,7 @@ agent1:
     idx: 1
     n_i: 2
     p_i: 2
-    x_0: [1, -1]
+    x_0: [1, 1]
     x_H: [0, 0]
     in_neigh: {}
     out_neigh: {}
@@ -18,7 +18,7 @@ agent2:
     idx: 2
     n_i: 2
     p_i: 2
-    x_0: [1, -1]
+    x_0: [-1, -1]
     x_H: [0, 0]
     in_neigh: {}
     out_neigh: {}
