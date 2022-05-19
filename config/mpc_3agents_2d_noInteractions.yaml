@@ -1,0 +1,39 @@
+# Simple network where:
+# - agents only affect themselves
+# - agents have identity dynamics and simple input laws
+
+agent1:
+    idx: 1
+    n_i: 2
+    p_i: 2
+    x_0: [1, -1]
+    x_H: [0, 0]
+    in_neigh: {}
+    out_neigh: {}
+    matA: [[1, 0], [0, 1]]
+    matB: [[1, 0], [0, 1]]
+    matCost: [[1, 0], [0, 1]]
+
+agent2:
+    idx: 2
+    n_i: 2
+    p_i: 2
+    x_0: [1, -1]
+    x_H: [0, 0]
+    in_neigh: {}
+    out_neigh: {}
+    matA: [[1, 0], [0, 1]]
+    matB: [[1, 0], [0, 1]]
+    matCost: [[1, 0], [0, 1]]
+
+agent3:
+    idx: 3
+    n_i: 2
+    p_i: 2
+    x_0: [1, -1]
+    x_H: [0, 0]
+    in_neigh: {}
+    out_neigh: {}
+    matA: [[1, 0], [0, 1]]
+    matB: [[1, 0], [0, 1]]
+    matCost: [[1, 0], [0, 1]]
