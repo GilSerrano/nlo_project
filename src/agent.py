@@ -1,16 +1,11 @@
 '''
 Definition of class Agent
-
-
 '''
 import sys
 sys.path.append("..")
 import numpy as np
 import yaml
 from utils.file_handling import get_params_file
-
-
-
 
 class Agent(object):
 
@@ -55,20 +50,4 @@ class Agent(object):
         for key, value in self.outB.items():
             output += '\t B'+ str(key) + ' = ' + str(value) + '\n'
         
-        return output
-        
-if __name__ == "__main__":
-    
-    file = get_params_file()
-    with open(file, 'r') as stream:
-        try:
-            data = yaml.safe_load(stream)
-            print('Loaded data.')
-        except yaml.YAMLError as error:
-            print(error)
-    
-    agents = []
-    
-    for key in data:
-        print(key)
-        agents.append(Agent(data[key]))       
+        return output    
