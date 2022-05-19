@@ -54,3 +54,19 @@ def plot2Dagent(x, idx):
     plt.suptitle('Agent ' + str(idx))
     #plt.tight_layout()
     plt.show()
+
+def plotNDagent(x, idx):
+    
+    N = x.shape[0]
+    t = np.arange(x.shape[1])
+
+    for ii in range(N):
+        plt.subplot(N,1,ii+1)
+        plt.plot(t, x[ii,:])
+        plt.xlabel('time t')
+        plt.ylabel('axis ' + str(ii+1))
+        plt.grid(True)
+        
+    plt.suptitle('Agent ' + str(idx))
+    plt.show()
+
