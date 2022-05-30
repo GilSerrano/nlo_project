@@ -116,3 +116,12 @@ class CentralisedProblem(Problem):
         for ii, agent in enumerate(self.agents):
             self.MatCost[ii_aux:ii_aux+agent.p, ii_aux:ii_aux+agent.p] = agent.matCost
             ii_aux += self.p_i[ii]
+
+'''
+Class for the Distributed version of the optimisation problem.
+It inherits from the previously defined Problem class.
+'''
+class DistributedProblem(Problem):
+    def __init__(self, file):
+        super().__init__(file)
+        
