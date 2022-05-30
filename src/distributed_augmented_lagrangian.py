@@ -27,23 +27,23 @@ class DistributedAugmentedLagrangian(object):
 
         for ii, agent in enumerate(self.prob.agents):
             # Set up optimisation variables
-            self.x[ii] = cp.Variable((agent.n_i, self.prob.horizon + 1))
-            self.u[ii] = cp.Variable((agent.p_i, self.prob.horizon))
+            self.x[ii] = cp.Variable((agent.n, self.prob.horizon + 1))
+            self.u[ii] = cp.Variable((agent.p, self.prob.horizon))
 
             # Initialise Lagrange multipliers to 1
-            self.lam[ii] = cp.Parameter((agent.n_i, self.prob.horizon))
-            self.lam[ii].value = np.ones((agent.n_i, self.prob.horizon))
+            self.lam[ii] = cp.Parameter((agent.n, self.prob.horizon))
+            self.lam[ii].value = np.ones((agent.n, self.prob.horizon))
 
             # Define the constraints
             self.constraints[ii] = [
-                self.x[0:self.prob.n] == self.prob.x0, # need to change this
-                self.x[-self.prob.n:,] == self.prob.xH,
+                self.x[ii][:,0] == agent.x_0, # need to change this
+                self.x[ii][:,-1] == agent.x_H,
                 ]
 
             # Auxiliary variable to save previous x value
-            self.x[ii].value = np.zeros((agent.n_i, self.prob.horizon + 1))
-            self.x_aux[ii] = np.zeros((agent.n_i, self.prob.horizon + 1))
-            self.u_aux[ii] = np.zeros((agent.p_i, self.prob.horizon))
+            self.x[ii].value = np.zeros((agent.n, self.prob.horizon + 1))
+            self.x_aux[ii] = np.zeros((agent.n, self.prob.horizon + 1))
+            self.u_aux[ii] = np.zeros((agent.p, self.prob.horizon))
 
         # Everything set, go to main loop
         self.main_loop()
@@ -99,26 +99,24 @@ class DistributedAugmentedLagrangian(object):
             # sum the inner product of lambda with the constraints over the horizon - 2nd line of eq. (10)
             for tt in range(self.prob.horizon):
                 self.cost_functions[ii] += self.lam[ii][:,tt].T @ (self.x[ii][:,tt+1] - self.prob.agents[ii].matA @ self.x[ii][:,tt] - self.prob.agents[ii].matB @ self.u[ii][:,tt])
-                for kk, jj in enumerate(self.prob.agents[ii].out_neigh):
-                    self.cost_functions[ii] -= self.lam[jj][:,tt].T @ (self.prob.agents[ii].matA_inter[kk] @ self.x[ii][:,tt] + self.prob.agents[ii].matB_inter[kk] @ self.u[ii][:,tt])
+                for jj in self.prob.agents[ii].out_neigh:
+                    self.cost_functions[ii] -= self.lam[jj-1][:,tt].T @ (self.prob.agents[ii].outA[(jj,ii+1)] @ self.x[ii][:,tt] + self.prob.agents[ii].outB[(jj,ii+1)] @ self.u[ii][:,tt])
 
             # sum the squared norm of the constraints of the agent over the horizon - 3rd line of eq. (10)
             for tt in range(self.prob.horizon):
                 cost_functions_aux = 0
                 for jj in self.prob.agents[ii].in_neigh:
-                    agent_ii_idx = list(self.prob.agents[jj].out_neigh).index(self.prob.agents[ii].idx) - 1 # get the idx of agent i in agent's j out-neighbourhood
-                    cost_functions_aux += (self.prob.agents[jj].matA_inter[agent_ii_idx] @ self.x_aux[jj][:,tt] + self.prob.agents[jj].matB_inter[agent_ii_idx] @ self.u_aux[jj][:,tt])
+                    cost_functions_aux += (self.prob.agents[jj-1].outA[(ii+1,jj)] @ self.x_aux[jj-1][:,tt] + self.prob.agents[jj-1].outB[(ii+1,jj)] @ self.u_aux[jj-1][:,tt])
                 
-                self.cost_function[ii] += (self.prob.rho/2) * cp.sum_squares(self.x[ii][:,tt+1] - self.prob.agents[ii].matA @ self.x[ii][:,tt] - self.prob.agents[ii].matB @ self.u[ii][:,tt] - cost_functions_aux)
+                self.cost_functions[ii] += (self.prob.rho/2) * cp.sum_squares(self.x[ii][:,tt+1] - self.prob.agents[ii].matA @ self.x[ii][:,tt] - self.prob.agents[ii].matB @ self.u[ii][:,tt] - cost_functions_aux)
 
             # sum the squared norm of dynamics of out-neighbourhood of j - 4th and 5th lines of eq. (10)
             for tt in range(self.prob.horizon):
-                for kk, jj in enumerate(self.prob.agents[ii].out_neigh):
+                for jj in self.prob.agents[ii].out_neigh:
                     cost_functions_aux = 0
-                    for mm in self.prob.agents[jj].in_neigh:
-                        agent_jj_idx = list(self.prob.agents[mm].out_neigh).index(self.prob.agents[jj].idx) - 1
-                        cost_functions_aux += (self.prob.agents[mm].matA_inter[agent_jj_idx] @ self.x_aux[mm][:,tt] - self.prob.agents[mm].matB_inter[agent_jj_idx] @ self.u_aux[mm][:,tt]) 
-                    self.cost_function[ii] += (self.prob.rho/2) * cp.sum_squares(self.x_aux[jj][:,tt+1] - self.prob.agents[ii].matA_inter[kk] @ self.x[ii][:,tt] - self.prob.agents[ii].matB_inter[kk] @ self.u[ii][:,tt] - cost_functions_aux)
+                    for mm in self.prob.agents[jj-1].in_neigh:
+                        cost_functions_aux += (self.prob.agents[mm-1].outA[(jj,mm)] @ self.x_aux[mm-1][:,tt] - self.prob.agents[mm-1].outB[(jj,mm)] @ self.u_aux[mm-1][:,tt]) 
+                    self.cost_functions[ii] += (self.prob.rho/2) * cp.sum_squares(self.x_aux[jj-1][:,tt+1] - self.prob.agents[ii].outA[(jj,ii+1)] @ self.x[ii][:,tt] - self.prob.agents[ii].outB[(jj,ii+1)] @ self.u[ii][:,tt] - cost_functions_aux)
 
 
     '''
@@ -150,9 +148,9 @@ class DistributedAugmentedLagrangian(object):
         # sum the constraints over the horizon
         for ii in range(len(self.prob.agents)):
             for tt in range(self.prob.horizon):
-                self.constraints_sum += self.x[ii].values[:,tt+1] - self.prob.agents[ii].matA @ self.x[ii].values[:,tt] - self.prob.agents[ii].matB @ self.u[ii].values[:,tt]
-                for kk, _ in enumerate(self.prob.agents[ii].out_neigh):
-                    self.constraints_sum -= self.prob.agents[ii].matA_inter[kk] @ self.x[ii].values[:,tt] + self.prob.agents[ii].matB_inter[kk] @ self.u[ii].values[:,tt]
+                self.constraints_sum += self.x[ii].value[:,tt+1] - self.prob.agents[ii].matA @ self.x[ii].value[:,tt] - self.prob.agents[ii].matB @ self.u[ii].value[:,tt]
+                for jj in self.prob.agents[ii].out_neigh:
+                    self.constraints_sum -= self.prob.agents[ii].outA[(jj,ii+1)] @ self.x[ii].value[:,tt] + self.prob.agents[ii].outB[(jj,ii+1)] @ self.u[ii].value[:,tt]
 
         if np.linalg.norm(self.constraints_sum) <= 10**(-8): # consider constraints are met
             return True
@@ -173,9 +171,9 @@ class DistributedAugmentedLagrangian(object):
             for tt in range(self.prob.horizon):
                 constraints_value = 0
                 # sum the constraints at time tt
-                constraints_value = self.x[ii].values[:,tt+1] - self.prob.agents[ii].matA @ self.x[ii].values[:,tt] - self.prob.agents[ii].matB @ self.u[ii].values[:,tt]
-                for kk, _ in enumerate(self.prob.agents[ii].out_neigh):
-                    constraints_value -= self.prob.agents[ii].matA_inter[kk] @ self.x[ii].values[:,tt] + self.prob.agents[ii].matB_inter[kk] @ self.u[ii].values[:,tt]
+                constraints_value = self.x[ii].value[:,tt+1] - self.prob.agents[ii].matA @ self.x[ii].value[:,tt] - self.prob.agents[ii].matB @ self.u[ii].value[:,tt]
+                for jj in self.prob.agents[ii].out_neigh:
+                    constraints_value -= self.prob.agents[ii].outA[(jj,ii+1)] @ self.x[ii].value[:,tt] + self.prob.agents[ii].outB[(jj,ii+1)] @ self.u[ii].value[:,tt]
 
                 # update the Langrange multipliers
                 self.lam[ii].value[:,tt] = self.lam[ii].value[:,tt] + self.prob.rho * self.tau * constraints_value
