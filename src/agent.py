@@ -15,25 +15,25 @@ class Agent(object):
         self.p = data['p_i'] # input dim
         
         # Initial and final conditions
-        self.x_0 = np.transpose(np.array(data['x_0']))
-        self.x_H = np.transpose(np.array(data['x_H']))
+        self.x_0 = np.transpose(np.array(data['x_0'], dtype='float64'))
+        self.x_H = np.transpose(np.array(data['x_H'], dtype='float64'))
         
         # In and Out Neighbourhoods
         self.in_neigh  = data['in_neigh']
         self.out_neigh = data['out_neigh']
         
         # Own dynamics
-        self.matA = np.array(data['matA'])
-        self.matB = np.array(data['matB'])
+        self.matA = np.array(data['matA'], dtype='float64')
+        self.matB = np.array(data['matB'], dtype='float64')
 
         # Dynamic interactions with out-neighbours
         self.outA = {}
         self.outB = {}
         for ii, out_idx in enumerate(self.out_neigh):
-            self.outA[(out_idx, self.idx)] = np.array(data['matA_inter'][ii])
-            self.outB[(out_idx, self.idx)] = np.array(data['matB_inter'][ii])
+            self.outA[(out_idx, self.idx)] = np.array(data['matA_inter'][ii], dtype='float64')
+            self.outB[(out_idx, self.idx)] = np.array(data['matB_inter'][ii], dtype='float64')
 
-        self.matCost = np.array(data['matCost'])
+        self.matCost = np.array(data['matCost'], dtype='float64')
 
     def __repr__(self):
         output = ''
