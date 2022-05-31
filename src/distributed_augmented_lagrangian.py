@@ -21,9 +21,6 @@ class DistributedAugmentedLagrangian(object):
         self.u_aux = [[] for ii in range(len(self.prob.agents))]
 
         self.constraints_sum = 0
-        self.tau = 1
-        
-
 
         for ii, agent in enumerate(self.prob.agents):
             # Set up optimisation variables
@@ -77,14 +74,7 @@ class DistributedAugmentedLagrangian(object):
                 break
                 
             # Increase k
-            self.increase_iteration()
-
-    '''
-    calculate_tau
-    Get the value of tau, dependent on the interactions between agents
-    '''
-    def calculate_tau(self):
-        pass
+            self.k += 1
 
     '''
     create_cost_functions()
@@ -135,7 +125,7 @@ class DistributedAugmentedLagrangian(object):
     in the warm start of the optimiser
     '''
     def update_variables(self, ii):
-        self.x[ii].value = self.x_aux[ii] + self.tau * (self.x[ii].value - self.x_aux[ii])
+        self.x[ii].value = self.x_aux[ii] + self.prob.tau * (self.x[ii].value - self.x_aux[ii])
 
     '''
     check_constraints()
@@ -152,13 +142,15 @@ class DistributedAugmentedLagrangian(object):
                 for jj in self.prob.agents[ii].out_neigh:
                     self.constraints_sum -= self.prob.agents[ii].outA[(jj,ii+1)] @ self.x[ii].value[:,tt] + self.prob.agents[ii].outB[(jj,ii+1)] @ self.u[ii].value[:,tt]
 
-        if np.linalg.norm(self.constraints_sum) <= 10**(-8): # consider constraints are met
+        if np.linalg.norm(self.constraints_sum) <= 10**(-4): # consider constraints are met
             return True
         elif np.linalg.norm(self.constraints_sum - aux_constraints_sum) <= 10**(-8):
             print('Converged but could not find a solution that met the constraints.')
             return True
         else:
-            print('Constraints error is ' + str(np.linalg.norm(self.constraints_sum)))
+            if self.k % 50 == 0:
+                print("k = " + str(self.k))
+                print('Constraints error is ' + str(np.linalg.norm(self.constraints_sum)))
             return False
  
     '''
@@ -176,11 +168,4 @@ class DistributedAugmentedLagrangian(object):
                     constraints_value -= self.prob.agents[ii].outA[(jj,ii+1)] @ self.x[ii].value[:,tt] + self.prob.agents[ii].outB[(jj,ii+1)] @ self.u[ii].value[:,tt]
 
                 # update the Langrange multipliers
-                self.lam[ii].value[:,tt] = self.lam[ii].value[:,tt] + self.prob.rho * self.tau * constraints_value
-
-    '''
-    increase_iterations()
-    To keep track of the number of iterations until convergence
-    '''
-    def increase_iteration(self):
-        self.k += 1
+                self.lam[ii].value[:,tt] = self.lam[ii].value[:,tt] + self.prob.rho * self.prob.tau * constraints_value

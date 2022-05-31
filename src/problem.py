@@ -16,10 +16,13 @@ class Problem(object):
         self.xH = []
         self.rho = 5
         self.horizon = 10
+        self.tau = 1
         
         self.loadProblem(file)
 
         self.checkProblem()
+
+        self.calculate_tau()
         
     '''
     Initialize the problem by reading the agents input file
@@ -61,7 +64,35 @@ class Problem(object):
             except:
                 print('Program tried to exit, but still running.')
 
+    '''
+    calculate_tau
+    Get the value of tau, dependent on the interactions between agents
+    '''
+    def calculate_tau(self):
+        N = self.agents[0].n
+        Q = np.zeros((N, 1))
 
+        for agent in self.agents:
+            # calculate matrices Ai and Bi for each agent
+            Ai = np.eye(N) - agent.matA 
+            Bi = -agent.matB
+            for _, outA in agent.outA.items():
+                Ai += - outA
+            
+            for _, outB in agent.outB.items():
+                Bi += outB
+            
+            # join both matrices because the variable related to agent i is [xi ui] - i think...
+            Mi = np.concatenate((Ai, Bi), axis=1)
+
+            # calculate if there rows of zeros
+            for jj in range(N):
+                if np.any(Mi[jj,:]):
+                    Q[jj] += 1
+        Q = Q * self.horizon
+        q = max(Q)
+        self.tau = (1/q)
+        print("tau = " + str(self.tau))
 
 '''
 Class for the Centralised version of the optimisation problem.
