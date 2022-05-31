@@ -30,5 +30,5 @@ if __name__ == '__main__':
 
     # Parse x and u, and plot
     for idx, _ in enumerate(prob.agents):
-        plotNDagent(dist_al.x[ii].value, idx+1)
-        plotNDagent(dist_al.u[ii].value, idx+1)
+        plotNDagent(dist_al.x[idx].value, idx+1)
+        plotNDagent(dist_al.u[idx].value, idx+1)
