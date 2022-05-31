@@ -113,7 +113,7 @@ class CentralisedAugmentedLagrangian(object):
         for ii in range(self.prob.horizon):
             self.constraints_sum = np.append(self.constraints_sum, self.x.value[(ii+1)*self.prob.n:(ii+2)*self.prob.n] - self.prob.MatA @ self.x.value[ii*self.prob.n:(ii+1)*self.prob.n] - self.prob.MatB @ self.u.value[ii*self.prob.p:(ii+1)*self.prob.p])
 
-        if np.linalg.norm(self.constraints_sum) <= 10**(-8): # consider constraints are met
+        if np.linalg.norm(self.constraints_sum) <= 10**(-4): # consider constraints are met
             return True
         elif np.linalg.norm(self.constraints_sum - aux_constraints_sum) <= 10**(-8):
             print('Converged but could not find a solution that met the constraints.')
