@@ -27,8 +27,19 @@ if __name__ == '__main__':
         print(dist_al.x[ii].value)
         print(dist_al.u[ii].value)
 
-
-    # Parse x and u, and plot
-    for idx, _ in enumerate(prob.agents):
+    
+    flag2D = True
+    # Plot results
+    for idx, agent in enumerate(prob.agents):
+        if agent.n != 2:
+            flag2D = False
+        # Plot state
         plotNDagent(dist_al.x[idx].value, idx+1)
+        if agent.n == 2:
+            plot2DagentMap(dist_al.x[idx].value, idx+1)
+        
+        # Plot input
         plotNDagent(dist_al.u[idx].value, idx+1)
+    
+    if flag2D:
+        plot2DagentsMap(dist_al.x)
