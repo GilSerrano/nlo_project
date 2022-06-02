@@ -40,6 +40,7 @@ class DistributedAugmentedLagrangian(object):
             # Auxiliary variable to save previous x value
             self.x[ii].value = np.zeros((agent.n, self.prob.horizon + 1))
             self.x_aux[ii] = np.zeros((agent.n, self.prob.horizon + 1))
+            self.u[ii].value = np.zeros((agent.p, self.prob.horizon))
             self.u_aux[ii] = np.zeros((agent.p, self.prob.horizon))
 
         # Everything set, go to main loop
@@ -126,6 +127,7 @@ class DistributedAugmentedLagrangian(object):
     '''
     def update_variables(self, ii):
         self.x[ii].value = self.x_aux[ii] + self.prob.tau * (self.x[ii].value - self.x_aux[ii])
+        self.u[ii].value = self.u_aux[ii] + self.prob.tau * (self.u[ii].value - self.u_aux[ii])
 
     '''
     check_constraints()

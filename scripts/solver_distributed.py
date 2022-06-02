@@ -5,7 +5,6 @@ from src.problem import *
 from src.distributed_augmented_lagrangian import *
 from utils.file_handling import get_params_file
 from utils.plotting import *
-from utils.results_parser import get_agent_states, get_agent_inputs
 
 if __name__ == '__main__':
     
