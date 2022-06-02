@@ -80,7 +80,7 @@ class Problem(object):
                 Ai += - outA
             
             for _, outB in agent.outB.items():
-                Bi += outB
+                Bi += - outB
             
             # join both matrices because the variable related to agent i is [xi ui] - i think...
             Mi = np.concatenate((Ai, Bi), axis=1)
