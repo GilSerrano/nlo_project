@@ -70,3 +70,30 @@ def plotNDagent(x, idx):
     plt.suptitle('Agent ' + str(idx))
     plt.show()
 
+def plot2DagentMap(x, idx):
+    
+    # plot
+    plt.plot(x[0,:], x[1,:], 'b-')
+    plt.plot(x[0,:], x[1,:], 'b*')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    #plt.title('title')
+    plt.grid(True)
+
+    plt.suptitle('Agent ' + str(idx))
+    #plt.tight_layout()
+    plt.show()
+
+def plot2DagentsMap(x):
+    
+    for xx in x:
+        # plot
+        plt.plot(xx.value[0,:], xx.value[1,:], '-')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        #plt.title('title')
+        plt.grid(True)
+
+    plt.suptitle('All agents')
+    #plt.tight_layout()
+    plt.show()
