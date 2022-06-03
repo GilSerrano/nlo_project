@@ -15,8 +15,8 @@ class Agent(object):
         self.p = data['p_i'] # input dim
         
         # Initial and final conditions
-        self.x_0 = np.transpose(np.array(data['x_0'], dtype='float64'))
-        self.x_H = np.transpose(np.array(data['x_H'], dtype='float64'))
+        self.x_0 = np.array(data['x_0'], dtype='float64').T
+        self.x_H = np.array(data['x_H'], dtype='float64').T
         
         # In and Out Neighbourhoods
         self.in_neigh  = data['in_neigh']

@@ -43,8 +43,8 @@ class Problem(object):
 
         self.n = sum(self.n_i)
         self.p = sum(self.p_i)
-        self.x0 = np.array(self.x0).reshape(len(self.x0),1)
-        self.xH = np.array(self.xH).reshape(len(self.xH),1)
+        self.x0 = np.array(self.x0)
+        self.xH = np.array(self.xH)
 
     '''
     Check if matrices A and B are of correct size for each agent.
