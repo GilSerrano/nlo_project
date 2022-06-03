@@ -5,6 +5,7 @@ from src.problem import *
 from src.distributed_augmented_lagrangian import *
 from utils.file_handling import get_params_file
 from utils.plotting import *
+from utils.data_handling import save_solution
 
 if __name__ == '__main__':
     
@@ -26,7 +27,7 @@ if __name__ == '__main__':
         print(dist_al.x[ii].value)
         print(dist_al.u[ii].value)
 
-    
+    '''
     flag2D = True
     # Plot results
     for idx, agent in enumerate(prob.agents):
@@ -42,3 +43,7 @@ if __name__ == '__main__':
     
     if flag2D:
         plot2DagentsMap(dist_al.x)
+    '''
+    for ii in range(len(dist_al.prob.agents)):
+        save_solution(dist_al.x[ii].value, filename, 'dist')
+        save_solution(dist_al.u[ii].value, filename, 'dist')
