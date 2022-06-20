@@ -58,8 +58,7 @@ def verify_solution(data):
 
     print("Residual")
     print(residual)
-    print("Norm of residual is " + str(np.linalg.norm(residual)))
-    if np.linalg.norm(residual) < 10**(-4):
-        print("Solution is valid.")
+    if np.all(np.less_equal(residual, 10**(-4))):
+        print("Solution is valid. Max entry is " + str(np.amax(residual)))
     else:
-        print("Solution is NOT valid.")
+        print("Solution is NOT valid. Max entry is " + str(np.amax(residual)))

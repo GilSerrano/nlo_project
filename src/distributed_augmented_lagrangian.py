@@ -20,8 +20,6 @@ class DistributedAugmentedLagrangian(object):
         self.x_aux = [[] for ii in range(len(self.prob.agents))]
         self.u_aux = [[] for ii in range(len(self.prob.agents))]
 
-        self.constraints_sum = 0
-
         for ii, agent in enumerate(self.prob.agents):
             # Set up optimisation variables
             self.x[ii] = cp.Variable((agent.n, self.prob.horizon + 1))
@@ -58,9 +56,7 @@ class DistributedAugmentedLagrangian(object):
         
         print('Starting main loop')
         while True:
-            for ii, _ in enumerate(self.prob.agents):
-                self.x_aux[ii] = self.x[ii].value 
-                self.u_aux[ii] = self.u[ii].value           
+            for ii, _ in enumerate(self.prob.agents):          
 
                 # Minimise to find new variable values
                 self.minimise(ii)
@@ -106,7 +102,7 @@ class DistributedAugmentedLagrangian(object):
                 for jj in self.prob.agents[ii].out_neigh:
                     cost_functions_aux = 0
                     for mm in self.prob.agents[jj-1].in_neigh:
-                        cost_functions_aux += (self.prob.agents[mm-1].outA[(jj,mm)] @ self.x_aux[mm-1][:,tt] - self.prob.agents[mm-1].outB[(jj,mm)] @ self.u_aux[mm-1][:,tt]) 
+                        cost_functions_aux += (self.prob.agents[mm-1].outA[(jj,mm)] @ self.x_aux[mm-1][:,tt] + self.prob.agents[mm-1].outB[(jj,mm)] @ self.u_aux[mm-1][:,tt]) # here was the bug - instead of +
                     self.cost_functions[ii] += (self.prob.rho/2) * cp.sum_squares(self.x_aux[jj-1][:,tt+1] - self.prob.agents[ii].outA[(jj,ii+1)] @ self.x[ii][:,tt] - self.prob.agents[ii].outB[(jj,ii+1)] @ self.u[ii][:,tt] - cost_functions_aux)
 
 
@@ -128,33 +124,33 @@ class DistributedAugmentedLagrangian(object):
     def update_variables(self, ii):
         self.x[ii].value = self.x_aux[ii] + self.prob.tau * (self.x[ii].value - self.x_aux[ii])
         self.u[ii].value = self.u_aux[ii] + self.prob.tau * (self.u[ii].value - self.u_aux[ii])
+        self.x_aux[ii] = self.x[ii].value 
+        self.u_aux[ii] = self.u[ii].value 
 
     '''
     check_constraints()
     Verify if the constraints are met to decide if the problem has been solved.
     '''
     def check_constraints(self):
-        aux_constraints_sum = self.constraints_sum
-        self.constraints_sum = 0
+        constraints_sum = 0
+        constraints_norm  = np.array([])
         
         # sum the constraints over the horizon
         for ii in range(len(self.prob.agents)):
             for tt in range(self.prob.horizon):
-                self.constraints_sum += self.x[ii].value[:,tt+1] - self.prob.agents[ii].matA @ self.x[ii].value[:,tt] - self.prob.agents[ii].matB @ self.u[ii].value[:,tt]
-                for jj in self.prob.agents[ii].out_neigh:
-                    self.constraints_sum -= self.prob.agents[ii].outA[(jj,ii+1)] @ self.x[ii].value[:,tt] + self.prob.agents[ii].outB[(jj,ii+1)] @ self.u[ii].value[:,tt]
+                constraints_sum = self.x[ii].value[:,tt+1] - self.prob.agents[ii].matA @ self.x[ii].value[:,tt] - self.prob.agents[ii].matB @ self.u[ii].value[:,tt]
+                for jj in self.prob.agents[ii].in_neigh:
+                    constraints_sum -= self.prob.agents[jj-1].outA[(ii+1,jj)] @ self.x_aux[jj-1][:,tt] + self.prob.agents[jj-1].outB[(ii+1,jj)] @ self.u_aux[jj-1][:,tt]
+                constraints_norm = np.append(constraints_norm, np.linalg.norm(constraints_sum))
 
-        if np.linalg.norm(self.constraints_sum) <= 10**(-4): # consider constraints are met
-            return True
-        elif np.linalg.norm(self.constraints_sum - aux_constraints_sum) <= 10**(-8):
-            print('Converged but could not find a solution that met the constraints.')
+        if np.all(np.less_equal(constraints_norm, 10**(-4))): # consider constraints are met
             return True
         else:
-            if self.k % 50 == 0:
+            if self.k % 100 == 0:
                 print("k = " + str(self.k))
-                print('Constraints error is ' + str(np.linalg.norm(self.constraints_sum)))
+                print('Norms of errors are ')
+                print(constraints_norm)
             return False
- 
     '''
     update_lagrange_multipliers()
     Update the Lagrange multiplier parameters, according to equation (7) in Algorithm 1
@@ -166,8 +162,8 @@ class DistributedAugmentedLagrangian(object):
                 constraints_value = 0
                 # sum the constraints at time tt
                 constraints_value = self.x[ii].value[:,tt+1] - self.prob.agents[ii].matA @ self.x[ii].value[:,tt] - self.prob.agents[ii].matB @ self.u[ii].value[:,tt]
-                for jj in self.prob.agents[ii].out_neigh:
-                    constraints_value -= self.prob.agents[ii].outA[(jj,ii+1)] @ self.x[ii].value[:,tt] + self.prob.agents[ii].outB[(jj,ii+1)] @ self.u[ii].value[:,tt]
+                for jj in self.prob.agents[ii].in_neigh:
+                    constraints_value -= self.prob.agents[jj-1].outA[(ii+1,jj)] @ self.x_aux[jj-1][:,tt] + self.prob.agents[jj-1].outB[(ii+1,jj)] @ self.u_aux[jj-1][:,tt]
 
                 # update the Langrange multipliers
                 self.lam[ii].value[:,tt] = self.lam[ii].value[:,tt] + self.prob.rho * self.prob.tau * constraints_value
