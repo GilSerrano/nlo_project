@@ -46,7 +46,20 @@ def save_solution_dict(data, filename, type):
 data is of class CentralisedAugmentedLagrangian or DistributedAugmentedLagrangian
 '''
 def verify_solution(data):
-
-    for tt in data.prob.horizon:
+    residual = np.array([])
+    for tt in range(data.prob.horizon):
         for ii, agent in enumerate(data.prob.agents):
-            residual = data.x[ii].value[:,tt+1]
+            res = data.x[ii].value[:,tt+1] - (agent.matA @ data.x[ii].value[:,tt] + agent.matB @ data.u[ii].value[:,tt])
+            for jj in agent.in_neigh:
+                in_agent = data.prob.agents[jj-1]
+                res -= in_agent.outA[(agent.idx,in_agent.idx)] @ data.x[jj-1].value[:,tt] + in_agent.outB[(agent.idx,in_agent.idx)] @ data.u[jj-1].value[:,tt]
+
+            residual = np.append(residual, np.linalg.norm(res))
+
+    print("Residual")
+    print(residual)
+    print("Norm of residual is " + str(np.linalg.norm(residual)))
+    if np.linalg.norm(residual) < 10**(-4):
+        print("Solution is valid.")
+    else:
+        print("Solution is NOT valid.")
