@@ -5,6 +5,8 @@ from src.problem import *
 from src.centralised_augmented_lagrangian import *
 from utils.file_handling import get_params_file
 from utils.plotting import *
+from utils.data_handling import save_solution, verify_solution, verify_cost_function
+from utils.results_parser import *
 
 if __name__ == '__main__':
     
@@ -21,6 +23,7 @@ if __name__ == '__main__':
 
     # Begin solving the problem with centralised adal
     cent_al = CentralisedAugmentedLagrangian(prob)
+
     for ii in range(len(prob.agents)):
         print("Agent " + str(ii+1))
         print(cent_al.x[ii].value)
@@ -41,3 +44,10 @@ if __name__ == '__main__':
     
     if flag2D:
         plot2DagentsMap(cent_al.x)
+
+    for ii in range(len(cent_al.prob.agents)):
+        save_solution(cent_al.x[ii].value, filename, 'cent')
+        save_solution(cent_al.u[ii].value, filename, 'cent')
+    
+    verify_solution(cent_al)
+    verify_cost_function(cent_al)
