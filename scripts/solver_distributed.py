@@ -5,7 +5,7 @@ from src.problem import *
 from src.distributed_augmented_lagrangian import *
 from utils.file_handling import get_params_file
 from utils.plotting import *
-from utils.data_handling import save_solution, verify_solution
+from utils.data_handling import save_solution, verify_solution, verify_cost_function
 
 if __name__ == '__main__':
     
@@ -26,6 +26,7 @@ if __name__ == '__main__':
         print("Agent " + str(ii+1))
         print(dist_al.x[ii].value)
         print(dist_al.u[ii].value)
+        print(dist_al.lam[ii].value)
 
     
     flag2D = True
@@ -49,3 +50,4 @@ if __name__ == '__main__':
         save_solution(dist_al.u[ii].value, filename, 'dist')
     
     verify_solution(dist_al)
+    verify_cost_function(dist_al)

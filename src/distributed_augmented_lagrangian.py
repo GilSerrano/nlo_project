@@ -8,6 +8,7 @@ class DistributedAugmentedLagrangian(object):
         
         # Get problem details
         self.prob = problem
+        self.solution_value = [[] for ii in range(len(self.prob.agents))]
 
         # Initialise optimization related parameters and functions
         self.cost_functions = [0 for ii in range(len(self.prob.agents))]
@@ -17,6 +18,7 @@ class DistributedAugmentedLagrangian(object):
         self.lam = [[] for ii in range(len(self.prob.agents))]
         
         self.constraints = [[] for ii in range(len(self.prob.agents))]
+        self.constraints_norm  = np.zeros((len(self.prob.agents)*self.prob.horizon,))
         self.x_aux = [[] for ii in range(len(self.prob.agents))]
         self.u_aux = [[] for ii in range(len(self.prob.agents))]
 
@@ -68,6 +70,7 @@ class DistributedAugmentedLagrangian(object):
             if not self.check_constraints():
                 self.update_lagrange_multipliers()
             else:
+                print('Optimal value is ' + str(self.solution_value))
                 break
                 
             # Increase k
@@ -102,6 +105,8 @@ class DistributedAugmentedLagrangian(object):
                 for jj in self.prob.agents[ii].out_neigh:
                     cost_functions_aux = 0
                     for mm in self.prob.agents[jj-1].in_neigh:
+                        if mm == (ii+1): # agent m is the same as i - do not count it (see eq.10)
+                            continue
                         cost_functions_aux += (self.prob.agents[mm-1].outA[(jj,mm)] @ self.x_aux[mm-1][:,tt] + self.prob.agents[mm-1].outB[(jj,mm)] @ self.u_aux[mm-1][:,tt]) # here was the bug - instead of +
                     self.cost_functions[ii] += (self.prob.rho/2) * cp.sum_squares(self.x_aux[jj-1][:,tt+1] - self.prob.agents[ii].outA[(jj,ii+1)] @ self.x[ii][:,tt] - self.prob.agents[ii].outB[(jj,ii+1)] @ self.u[ii][:,tt] - cost_functions_aux)
 
@@ -115,6 +120,7 @@ class DistributedAugmentedLagrangian(object):
         objective = cp.Minimize(self.cost_functions[ii])
         opt_prob = cp.Problem(objective, self.constraints[ii])
         opt_prob.solve(warm_start=True)
+        self.solution_value[ii] = opt_prob.value
 
     '''
     update_variables()
@@ -133,7 +139,8 @@ class DistributedAugmentedLagrangian(object):
     '''
     def check_constraints(self):
         constraints_sum = 0
-        constraints_norm  = np.array([])
+        constraints_norm_aux  = self.constraints_norm
+        self.constraints_norm = np.array([])
         
         # sum the constraints over the horizon
         for ii in range(len(self.prob.agents)):
@@ -141,15 +148,19 @@ class DistributedAugmentedLagrangian(object):
                 constraints_sum = self.x[ii].value[:,tt+1] - self.prob.agents[ii].matA @ self.x[ii].value[:,tt] - self.prob.agents[ii].matB @ self.u[ii].value[:,tt]
                 for jj in self.prob.agents[ii].in_neigh:
                     constraints_sum -= self.prob.agents[jj-1].outA[(ii+1,jj)] @ self.x_aux[jj-1][:,tt] + self.prob.agents[jj-1].outB[(ii+1,jj)] @ self.u_aux[jj-1][:,tt]
-                constraints_norm = np.append(constraints_norm, np.linalg.norm(constraints_sum))
+                self.constraints_norm = np.append(self.constraints_norm, np.linalg.norm(constraints_sum))
 
-        if np.all(np.less_equal(constraints_norm, 10**(-4))): # consider constraints are met
-            return True
+        if np.all(np.less_equal(self.constraints_norm, 10**(-4))): # consider constraints are met
+            if np.all(np.less_equal(constraints_norm_aux - self.constraints_norm, 10**(-8))): # consider convergence
+                print('Constraints met.')
+                print('Norms of errors are ')
+                print(self.constraints_norm)
+                return True
         else:
             if self.k % 100 == 0:
                 print("k = " + str(self.k))
                 print('Norms of errors are ')
-                print(constraints_norm)
+                print(self.constraints_norm)
             return False
     '''
     update_lagrange_multipliers()
