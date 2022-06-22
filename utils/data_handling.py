@@ -62,3 +62,31 @@ def verify_solution(data):
         print("Solution is valid. Max entry is " + str(np.amax(residual)))
     else:
         print("Solution is NOT valid. Max entry is " + str(np.amax(residual)))
+
+'''
+data is of class CentralisedAugmentedLagrangian or DistributedAugmentedLagrangian
+'''
+def verify_cost_function(data):
+    cost = 0
+    for tt in range(data.prob.horizon):
+        for ii, agent in enumerate(data.prob.agents): 
+            cost += data.u[ii].value[:,tt].T @ agent.matCost @ data.u[ii].value[:,tt]
+    print('Total cost is ' + str(cost))
+
+def pos_verify_solution(prob, x, u):
+    residual = np.array([])
+    for tt in range(prob.horizon):
+        for ii, agent in enumerate(prob.agents):
+            res = x[ii][:,tt+1] - (agent.matA @ x[ii][:,tt] + agent.matB @ u[ii][:,tt])
+            for jj in agent.in_neigh:
+                in_agent = prob.agents[jj-1]
+                res -= in_agent.outA[(agent.idx,in_agent.idx)] @ x[jj-1][:,tt] + in_agent.outB[(agent.idx,in_agent.idx)] @ u[jj-1][:,tt]
+
+            residual = np.append(residual, np.linalg.norm(res))
+
+    print("Residual")
+    print(residual)
+    if np.all(np.less_equal(residual, 10**(-4))):
+        print("Solution is valid. Max entry is " + str(np.amax(residual)))
+    else:
+        print("Solution is NOT valid. Max entry is " + str(np.amax(residual)))
