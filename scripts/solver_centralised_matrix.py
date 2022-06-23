@@ -26,38 +26,25 @@ if __name__ == '__main__':
     
     cost = 0
     
+    x = [[] for ii in range(len(prob.agents))]
+
     # Parse x and u, and plot
     for idx, _ in enumerate(prob.agents):
         state = get_agent_states(prob, cent_al.x.value, idx+1)
         input = get_agent_inputs(prob, cent_al.u.value, idx+1)
         plotNDagent(state, idx+1)
         plotNDagent(input, idx+1)
+        x[idx] = state
         for tt in range(prob.horizon):
             cost += input[:,tt].T @ prob.agents[idx].matCost @ input[:,tt]
     
+    if prob.agents[0].n == 2:
+        plot2DagentsMapMatrix(x)
+
+
     print('Total cost is ' + str(cost))
 
-    # for ii in range(len(prob.agents)):
-    #     print("Agent " + str(ii+1))
-    #     print(cent_al.x[ii].value)
-    #     print(cent_al.u[ii].value)
-
-    # flag2D = True
-    # # Plot results
-    # for idx, agent in enumerate(prob.agents):
-    #     if agent.n != 2:
-    #         flag2D = False
-    #     # Plot state
-    #     plotNDagent(cent_al.x[idx].value, idx+1)
-    #     if agent.n == 2:
-    #         plot2DagentMap(cent_al.x[idx].value, idx+1)
-        
-    #     # Plot input
-    #     plotNDagent(cent_al.u[idx].value, idx+1)
     
-    # if flag2D:
-    #     plot2DagentsMap(cent_al.x)
-
     # for ii in range(len(cent_al.prob.agents)):
     #     save_solution(cent_al.x[ii].value, filename, 'cent')
     #     save_solution(cent_al.u[ii].value, filename, 'cent')
