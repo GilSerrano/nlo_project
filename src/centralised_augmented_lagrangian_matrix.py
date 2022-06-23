@@ -119,29 +119,10 @@ class CentralisedAugmentedLagrangian(object):
         if np.all(np.less_equal(self.constraints_sum, 10**(-4))): # consider constraints are met
             if np.all(np.less_equal(self.constraints_sum - aux_constraints_sum, 10**(-8))):
                 return True
-            #return True
-        # elif np.all(np.less_equal(self.constraints_sum - aux_constraints_sum, 10**(-8))):
-        #     print('Converged but could not find a solution that met the constraints.')
-        #     return True
         else:
             print('Constraints error is ')
             print(self.constraints_sum)
             return False
-        # aux_constraints_sum = self.constraints_sum
-        # self.constraints_sum = np.array([])
-        
-        # # sum the constraints over the horizon
-        # for ii in range(self.prob.horizon):
-        #     self.constraints_sum = np.append(self.constraints_sum, self.x.value[(ii+1)*self.prob.n:(ii+2)*self.prob.n] - self.prob.MatA @ self.x.value[ii*self.prob.n:(ii+1)*self.prob.n] - self.prob.MatB @ self.u.value[ii*self.prob.p:(ii+1)*self.prob.p])
-
-        # if np.linalg.norm(self.constraints_sum) <= 10**(-4): # consider constraints are met
-        #     return True
-        # elif np.linalg.norm(self.constraints_sum - aux_constraints_sum) <= 10**(-8):
-        #     print('Converged but could not find a solution that met the constraints.')
-        #     return True
-        # else:
-        #     print('Constraints error is ' + str(np.linalg.norm(self.constraints_sum)))
-        #     return False
  
     '''
     update_lagrange_multipliers()

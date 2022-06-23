@@ -73,6 +73,9 @@ def verify_cost_function(data):
             cost += data.u[ii].value[:,tt].T @ agent.matCost @ data.u[ii].value[:,tt]
     print('Total cost is ' + str(cost))
 
+'''
+verify the solution saved in a npy file
+'''
 def pos_verify_solution(prob, x, u):
     residual = np.array([])
     for tt in range(prob.horizon):
