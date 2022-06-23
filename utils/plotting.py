@@ -97,3 +97,17 @@ def plot2DagentsMap(x):
     plt.suptitle('All agents')
     #plt.tight_layout()
     plt.show()
+
+def plot2DagentsMapMatrix(x):
+    
+    for xx in x:
+        # plot
+        plt.plot(xx[0,:], xx[1,:], '-')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    #plt.title('title')
+    plt.grid(True)
+
+    plt.suptitle('All agents')
+    #plt.tight_layout()
+    plt.show()
