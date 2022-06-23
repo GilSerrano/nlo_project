@@ -4,7 +4,7 @@ sys.path.append("..")
 import numpy as np
 import matplotlib.pyplot as plt
 
-from utils.data_handling import verify_solution
+from utils.data_handling import *
 from utils.plotting import plot2DagentsMap
 from src.distributed_augmented_lagrangian import *
 from src.problem import *
@@ -35,3 +35,5 @@ if __name__ == '__main__':
 
     plt.suptitle('All agents')
     plt.show()
+
+    pos_verify_solution(prob, x, u)
