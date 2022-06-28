@@ -20,11 +20,11 @@ def generate_agent(agent_idx, n_state, N_agents):
     # Generate set of out neighbours
     out_neigh = set()
     for ii in range(N_agents): # go over all agents
-        if np.random.randint(0,2) and (ii+1)!=agent_idx: # if we get randomly a 1, we add to the out neighbourhood
+        if np.random.randint(0,11) < 2 and (ii+1)!=agent_idx: # if we get randomly a 1, we add to the out neighbourhood
             out_neigh.add(ii+1)
 
-    print('agent'+str(agent_idx)+' out neigh is')
-    print(out_neigh)
+    # print('agent'+str(agent_idx)+' out neigh is')
+    # print(out_neigh)
 
     # Generate diagonal state and input matrices
     matA = np.diag(np.random.rand(n_state,)).tolist()
@@ -57,10 +57,9 @@ def update_in_neighbourhood(prob_dict):
     for _, agent in prob_dict.items():
         # go over agents in its out neighbourhood
         for jj in agent['out_neigh']:
-            print(jj)
             # add agent to their in neighbourhood
             prob_dict['agent'+str(jj)]['in_neigh'].add(agent['idx'])
     
-    for _, agent in prob_dict.items():
-        print('agent'+str(agent['idx'])+' in neigh is')
-        print(agent['in_neigh'])
+    # for _, agent in prob_dict.items():
+    #     print('agent'+str(agent['idx'])+' in neigh is')
+    #     print(agent['in_neigh'])
