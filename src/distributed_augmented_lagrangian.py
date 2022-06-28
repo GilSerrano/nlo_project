@@ -9,6 +9,7 @@ class DistributedAugmentedLagrangian(object):
         # Get problem details
         self.prob = problem
         self.solution_value = [[] for ii in range(len(self.prob.agents))]
+        self.solution_value_convergence = []
 
         # Initialise optimization related parameters and functions
         self.cost_functions = [0 for ii in range(len(self.prob.agents))]
@@ -21,6 +22,9 @@ class DistributedAugmentedLagrangian(object):
         self.constraints_norm  = np.zeros((len(self.prob.agents)*self.prob.horizon,))
         self.x_aux = [[] for ii in range(len(self.prob.agents))]
         self.u_aux = [[] for ii in range(len(self.prob.agents))]
+
+        self.constraints_convergence = []
+        self.max_constraints_convergence = []
 
         for ii, agent in enumerate(self.prob.agents):
             # Set up optimisation variables
@@ -65,6 +69,9 @@ class DistributedAugmentedLagrangian(object):
 
                 # Update x and u
                 self.update_variables(ii)
+
+            # Sum all agents solution at present iteration
+            self.solution_value_convergence.append(sum(self.solution_value))
 
             # Check if constraint are met, if so stop, otherwise update lambdas and continue
             if not self.check_constraints():
@@ -149,6 +156,10 @@ class DistributedAugmentedLagrangian(object):
                 for jj in self.prob.agents[ii].in_neigh:
                     constraints_sum -= self.prob.agents[jj-1].outA[(ii+1,jj)] @ self.x_aux[jj-1][:,tt] + self.prob.agents[jj-1].outB[(ii+1,jj)] @ self.u_aux[jj-1][:,tt]
                 self.constraints_norm = np.append(self.constraints_norm, np.linalg.norm(constraints_sum))
+
+        # Append constraints value (sum and max) at each iteration
+        self.constraints_convergence.append(sum(self.constraints_norm))
+        self.max_constraints_convergence.append(max(self.constraints_norm))
 
         if np.all(np.less_equal(self.constraints_norm, 10**(-4))): # consider constraints are met
             if np.all(np.less_equal(constraints_norm_aux - self.constraints_norm, 10**(-8))): # consider convergence

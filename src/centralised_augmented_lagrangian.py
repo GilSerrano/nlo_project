@@ -24,6 +24,8 @@ class CentralisedAugmentedLagrangian(object):
         
         # Define the constraints
         self.constraints = []
+        self.constraints_convergence = []
+        self.max_constraints_convergence = []
 
         # Auxiliary variable to save previous x value
         self.x_aux = [[] for ii in range(len(self.prob.agents))]
@@ -190,6 +192,10 @@ class CentralisedAugmentedLagrangian(object):
                 for jj in self.prob.agents[ii].in_neigh:
                     constraints_sum -= self.prob.agents[jj-1].outA[(ii+1,jj)] @ self.x_aux[jj-1][:,tt] + self.prob.agents[jj-1].outB[(ii+1,jj)] @ self.u_aux[jj-1][:,tt]
                 self.constraints_norm = np.append(self.constraints_norm, np.linalg.norm(constraints_sum))
+
+        # Append constraints value (sum and max) at each iteration
+        self.constraints_convergence.append(sum(self.constraints_norm))
+        self.max_constraints_convergence.append(max(self.constraints_sum))
 
         if np.all(np.less_equal(self.constraints_norm, 10**(-4))): # consider constraints are met
             if np.all(np.less_equal(constraints_norm_aux - self.constraints_norm, 10**(-8))): # consider convergence

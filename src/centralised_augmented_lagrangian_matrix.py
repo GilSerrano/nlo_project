@@ -13,6 +13,8 @@ class CentralisedAugmentedLagrangian(object):
         self.cost_function = 0
         self.constraints_sum = 0
         self.tau = 1
+        self.constraints_convergence = []
+        self.max_constraints_convergence = []
 
         # Set up optimisation variables
         self.x = cp.Variable((self.prob.n * (self.prob.horizon + 1), 1))
@@ -115,6 +117,10 @@ class CentralisedAugmentedLagrangian(object):
         # sum the constraints over the horizon
         for ii in range(self.prob.horizon):
             self.constraints_sum = np.append(self.constraints_sum, np.linalg.norm(self.x.value[(ii+1)*self.prob.n:(ii+2)*self.prob.n] - self.prob.MatA @ self.x.value[ii*self.prob.n:(ii+1)*self.prob.n] - self.prob.MatB @ self.u.value[ii*self.prob.p:(ii+1)*self.prob.p]))
+
+        # Append constraints value (sum and max) at each iteration
+        self.constraints_convergence.append(sum(self.constraints_sum))
+        self.max_constraints_convergence.append(max(self.constraints_sum))
 
         if np.all(np.less_equal(self.constraints_sum, 10**(-4))): # consider constraints are met
             if np.all(np.less_equal(self.constraints_sum - aux_constraints_sum, 10**(-8))):
