@@ -5,7 +5,6 @@ from src.problem import *
 from src.centralised_augmented_lagrangian_matrix import *
 from utils.file_handling import get_params_file
 from utils.plotting import *
-from utils.data_handling import save_solution, verify_solution
 from utils.results_parser import *
 
 if __name__ == '__main__':
@@ -20,7 +19,7 @@ if __name__ == '__main__':
 
     # Set up the problem
     prob = CentralisedProblem(file)
-
+    
     # Begin solving the problem with centralised adal
     cent_al = CentralisedAugmentedLagrangian(prob)
     
@@ -40,13 +39,9 @@ if __name__ == '__main__':
     
     if prob.agents[0].n == 2:
         plot2DagentsMapMatrix(x)
-
-
-    print('Total cost is ' + str(cost))
-
     
-    # for ii in range(len(cent_al.prob.agents)):
-    #     save_solution(cent_al.x[ii].value, filename, 'cent')
-    #     save_solution(cent_al.u[ii].value, filename, 'cent')
+    plotConstraintsConvergence(cent_al.constraints_convergence)
+    plotConstraintsConvergence(cent_al.constraints_convergence, 'log')
+    plotMaxConstraintsConvergence(cent_al.max_constraints_convergence)
+    plotMaxConstraintsConvergence(cent_al.max_constraints_convergence, 'log')
     
-    # verify_solution(cent_al)

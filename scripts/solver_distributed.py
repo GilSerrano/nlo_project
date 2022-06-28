@@ -5,7 +5,7 @@ from src.problem import *
 from src.distributed_augmented_lagrangian import *
 from utils.file_handling import get_params_file
 from utils.plotting import *
-from utils.data_handling import save_solution, verify_solution, verify_cost_function
+from utils.data_handling import *
 
 if __name__ == '__main__':
     
@@ -26,7 +26,6 @@ if __name__ == '__main__':
         print("Agent " + str(ii+1))
         print(dist_al.x[ii].value)
         print(dist_al.u[ii].value)
-        print(dist_al.lam[ii].value)
 
     
     flag2D = True
@@ -34,20 +33,19 @@ if __name__ == '__main__':
     for idx, agent in enumerate(prob.agents):
         if agent.n != 2:
             flag2D = False
-        # Plot state
-        plotNDagent(dist_al.x[idx].value, idx+1)
-        if agent.n == 2:
-            plot2DagentMap(dist_al.x[idx].value, idx+1)
-        
-        # Plot input
-        plotNDagent(dist_al.u[idx].value, idx+1)
     
     if flag2D:
         plot2DagentsMap(dist_al.x)
+        plot2Dagents(dist_al.x, "state")
+        plot2Dagents(dist_al.u, "input")
     
-    for ii in range(len(dist_al.prob.agents)):
-        save_solution(dist_al.x[ii].value, filename, 'dist')
-        save_solution(dist_al.u[ii].value, filename, 'dist')
+    plotMaxConstraintsConvergence(dist_al.max_constraints_convergence, 'log')
+
+    plotObjectiveFunctionConvergence(dist_al.solution_value_convergence)
+
+    # for ii in range(len(dist_al.prob.agents)):
+    #     save_solution(dist_al.x[ii].value, filename, 'dist')
+    #     save_solution(dist_al.u[ii].value, filename, 'dist')
     
     verify_solution(dist_al)
     verify_cost_function(dist_al)

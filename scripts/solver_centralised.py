@@ -5,7 +5,7 @@ from src.problem import *
 from src.centralised_augmented_lagrangian import *
 from utils.file_handling import get_params_file
 from utils.plotting import *
-from utils.data_handling import save_solution, verify_solution, verify_cost_function
+from utils.data_handling import *
 from utils.results_parser import *
 
 if __name__ == '__main__':
@@ -34,20 +34,14 @@ if __name__ == '__main__':
     for idx, agent in enumerate(prob.agents):
         if agent.n != 2:
             flag2D = False
-        # Plot state
-        plotNDagent(cent_al.x[idx].value, idx+1)
-        if agent.n == 2:
-            plot2DagentMap(cent_al.x[idx].value, idx+1)
-        
-        # Plot input
-        plotNDagent(cent_al.u[idx].value, idx+1)
     
     if flag2D:
         plot2DagentsMap(cent_al.x)
 
-    for ii in range(len(cent_al.prob.agents)):
-        save_solution(cent_al.x[ii].value, filename, 'cent')
-        save_solution(cent_al.u[ii].value, filename, 'cent')
-    
+    plotConstraintsConvergence(cent_al.constraints_convergence)
+    plotConstraintsConvergence(cent_al.constraints_convergence, 'log')
+    plotMaxConstraintsConvergence(cent_al.max_constraints_convergence)
+    plotMaxConstraintsConvergence(cent_al.max_constraints_convergence, 'log')
+
     verify_solution(cent_al)
     verify_cost_function(cent_al)
