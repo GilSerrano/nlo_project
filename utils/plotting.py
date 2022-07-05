@@ -8,20 +8,20 @@ def plot3Dagent(x, idx):
     # plot
     plt.subplot(3,1,1)
     plt.plot(t, x[0,:])
-    plt.xlabel('time t')
-    plt.ylabel('x-axis')
+    plt.xlabel('time t', fontsize='16')
+    plt.ylabel('x-axis', fontsize='16')
     plt.grid(True)
     
     plt.subplot(3,1,2)
     plt.plot(t, x[1,:])
-    plt.xlabel('time t')
-    plt.ylabel('y-axis')
+    plt.xlabel('time t', fontsize='16')
+    plt.ylabel('y-axis', fontsize='16')
     plt.grid(True)
 
     plt.subplot(3,1,3)
     plt.plot(t, x[2,:])
-    plt.xlabel('time t')
-    plt.ylabel('z-axis')
+    plt.xlabel('time t', fontsize='16')
+    plt.ylabel('z-axis', fontsize='16')
     plt.grid(True)
     
     plt.suptitle('Agent ' + str(idx))
@@ -35,14 +35,14 @@ def plot2Dagent(x, idx):
     # plot
     plt.subplot(2,1,1)
     plt.plot(t, x[0,:])
-    plt.xlabel('time t')
-    plt.ylabel('x-axis')
+    plt.xlabel('time t', fontsize='16')
+    plt.ylabel('x-axis', fontsize='16')
     plt.grid(True)
     
     plt.subplot(2,1,2)
     plt.plot(t, x[1,:])
-    plt.xlabel('time t')
-    plt.ylabel('y-axis')
+    plt.xlabel('time t', fontsize='16')
+    plt.ylabel('y-axis', fontsize='16')
     plt.grid(True)
 
     plt.suptitle('Agent ' + str(idx))
@@ -56,8 +56,8 @@ def plotNDagent(x, idx):
     for ii in range(N):
         plt.subplot(N,1,ii+1)
         plt.plot(t, x[ii,:])
-        plt.xlabel('time t')
-        plt.ylabel('axis ' + str(ii+1))
+        plt.xlabel('time t', fontsize='16')
+        plt.ylabel('axis ' + str(ii+1), fontsize='16')
         plt.grid(True)
         
     plt.suptitle('Agent ' + str(idx))
@@ -68,8 +68,8 @@ def plot2DagentMap(x, idx):
     # plot
     plt.plot(x[0,:], x[1,:], 'b-')
     plt.plot(x[0,:], x[1,:], 'b*')
-    plt.xlabel('x')
-    plt.ylabel('y')
+    plt.xlabel('x', fontsize='16')
+    plt.ylabel('y', fontsize='16')
     plt.grid(True)
 
     plt.suptitle('Agent ' + str(idx))
@@ -89,14 +89,14 @@ def plot2Dagents(x, ylabel):
         plt.plot(range(len(xx.value[1,:])), xx.value[1,:])
 
     plt.subplot(2,1,1)
-    plt.legend(lgd)
-    plt.xlabel("Time t")
-    plt.ylabel(ylabel + " 1")
+    plt.legend(lgd, loc='best')
+    plt.xlabel("Time t", fontsize='16')
+    plt.ylabel(ylabel + " 1", fontsize='16')
     plt.grid(True) 
     plt.subplot(2,1,2)
-    plt.legend(lgd)
-    plt.xlabel("Time t")
-    plt.ylabel(ylabel + " 2")
+    plt.legend(lgd, loc='best')
+    plt.xlabel("Time t", fontsize='16')
+    plt.ylabel(ylabel + " 2", fontsize='16')
     plt.grid(True)
     plt.show()
 
@@ -119,10 +119,11 @@ def plot2DagentsMap(x):
         plt.plot(xx.value[0,-1], xx.value[1,-1], marker="*", color="k")
         plt.annotate("ag"+str(ii+1), (xx.value[0,0], xx.value[1,0]))
     
-    plt.xlabel('state 1')
-    plt.ylabel('state 2')
+    plt.xlabel('state 1', fontsize='16')
+    plt.ylabel('state 2', fontsize='16')
     plt.grid(True)
-    plt.legend(lgd)
+    # plt.legend(lgd, loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.legend(lgd, loc='upper center', bbox_to_anchor=(0.5, 1.15), ncol=int(np.ceil(len(lgd)/2)))
     plt.show()
 
 def plot2DagentsMapMatrix(x):
@@ -130,8 +131,8 @@ def plot2DagentsMapMatrix(x):
     for xx in x:
         # plot
         plt.plot(xx[0,:], xx[1,:], '-')
-    plt.xlabel('x')
-    plt.ylabel('y')
+    plt.xlabel('x', fontsize='16')
+    plt.ylabel('y', fontsize='16')
     plt.grid(True)
 
     plt.suptitle('All agents')
@@ -141,12 +142,12 @@ def plotConstraintsConvergence(constraints_convergence, plot_type='normal'):
 
     if plot_type == 'log':
         plt.plot(range(len(constraints_convergence)), np.log10(constraints_convergence))
-        plt.ylabel('Log of Sum of Norms of Constraints Violation')
+        plt.ylabel('Log of Sum of Norms of Constraints Violation', fontsize='16')
     else:
         plt.plot(range(len(constraints_convergence)), constraints_convergence)
-        plt.ylabel('Sum of Norms of Constraints Violation')
+        plt.ylabel('Sum of Norms of Constraints Violation', fontsize='16')
 
-    plt.xlabel('Iterations')
+    plt.xlabel('Iterations', fontsize='16')
     plt.grid(True)
     plt.show()
 
@@ -154,12 +155,12 @@ def plotMaxConstraintsConvergence(constraints_convergence, plot_type='normal'):
 
     if plot_type == 'log':
         plt.plot(range(len(constraints_convergence)), np.log10(constraints_convergence))
-        plt.ylabel('Log of Maximum Norm of Constraints Violation')
+        plt.ylabel('Log of Maximum Norm of Constraints Violation', fontsize='16')
     else:
         plt.plot(range(len(constraints_convergence)), constraints_convergence)
-        plt.ylabel('Maximum of Norm of Constraints Violation')
+        plt.ylabel('Maximum of Norm of Constraints Violation', fontsize='16')
 
-    plt.xlabel('Iterations')
+    plt.xlabel('Iterations', fontsize='16')
     plt.grid(True)
     plt.show()
 
@@ -167,8 +168,8 @@ def plotObjectiveFunctionConvergence(objective_convergence):
     N = len(objective_convergence)
     plt.plot(range(N), objective_convergence)
     plt.plot(range(N), objective_convergence[-1]*np.ones((N,)))
-    plt.xlabel('Iterations')
-    plt.ylabel('Objective Function Convergence')
+    plt.xlabel('Iterations', fontsize='16')
+    plt.ylabel('Objective Function Convergence', fontsize='16')
     plt.grid(True)
     plt.show()
 
@@ -182,8 +183,8 @@ def plotAgentNetwork(problem):
             y = agent.x_0[1]
             dx = (problem.agents[neigh-1].x_0[0] - agent.x_0[0])
             dy = (problem.agents[neigh-1].x_0[1] - agent.x_0[1])
-            plt.arrow(x, y, dx, dy, head_width=0.05, length_includes_head=True, color="tab:blue")
+            plt.arrow(x, y, dx, dy, head_width=0.05, length_includes_head=True, color="tab:blue")    
     plt.grid(True)
-    plt.xlabel('x')
-    plt.ylabel('y')
+    plt.xlabel('x', fontsize='16')
+    plt.ylabel('y', fontsize='16')
     plt.show()
