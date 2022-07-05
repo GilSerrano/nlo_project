@@ -14,7 +14,7 @@ class Problem(object):
         self.p_i = []
         self.x0 = []
         self.xH = []
-        self.rho = 5
+        self.rho = 10
         self.horizon = 10
         self.tau = 1
         
