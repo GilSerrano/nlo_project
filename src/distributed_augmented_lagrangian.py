@@ -162,13 +162,13 @@ class DistributedAugmentedLagrangian(object):
         self.max_constraints_convergence.append(max(self.constraints_norm))
 
         if np.all(np.less_equal(self.constraints_norm, 10**(-4))): # consider constraints are met
-            if np.all(np.less_equal(constraints_norm_aux - self.constraints_norm, 10**(-8))): # consider convergence
+            if np.all(np.less_equal(constraints_norm_aux - self.constraints_norm, 10**(-5))): # consider convergence
                 print('Constraints met.')
                 print('Norms of errors are ')
                 print(self.constraints_norm)
                 return True
         else:
-            if self.k % 100 == 0:
+            if self.k % 250 == 0:
                 print("k = " + str(self.k))
                 print('Norms of errors are ')
                 print(self.constraints_norm)
